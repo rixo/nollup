@@ -249,10 +249,13 @@ It provides the following methods:
 ***void* accept(*Function* callback)**
 
 Executes when the current module, or a dependency has been replaced.
+Passes ```e``` argument which an object containing information about the accept.
 
 ***void* dispose(*Function* callback)**
 
 Executes when the module is about to be replaced.
+Callback receives ```data``` object. When the module is reloaded,
+this data can be read using ```module.hot.data```.
 
 ***String* status()**
 
