@@ -5,7 +5,7 @@ let path = require('path');
 let tests = [{
     input: 'import Hello from \'./world\';',
     output: {
-        transpiled: '',
+        code: '',
         imports: [{
             source: './world',
             importee: '_i0',
@@ -106,25 +106,25 @@ let tests = [{
     input: 'export default Hello;',
     output: {
         exports: ['default'],
-        transpiled: `__e__('default', Hello);`
+        code: `__e__('default', Hello);`
     }
 }, {
     input: 'export default 123;',
     output: {
         exports: ['default'],
-        transpiled: `__e__('default', 123);`
+        code: `__e__('default', 123);`
     }
 }, {
     input: 'export default () => {};',
     output: {
         exports: ['default'],
-        transpiled: `__e__('default', () => {});`
+        code: `__e__('default', () => {});`
     }
 }, {
     input: 'export default (() => {});',
     output: {
         exports: ['default'],
-        transpiled: `__e__('default', (() => {}));`
+        code: `__e__('default', (() => {}));`
     }
 }, /* {
     input: 'export default(() => {});',
@@ -133,67 +133,67 @@ let tests = [{
     input: 'export default class Hello {};',
     output: {
         exports: ['default'],
-        transpiled: `class Hello {}; __e__('default', Hello);;`
+        code: `class Hello {}; __e__('default', Hello);;`
     }
 }, {
     input: 'export default class Hello {}',
     output: {
         exports: ['default'],
-        transpiled: `class Hello {}; __e__('default', Hello);`
+        code: `class Hello {}; __e__('default', Hello);`
     }
 }, {
     input: 'export class Hello {};',
     output: {
         exports: ['Hello'],
-        transpiled: `class Hello {}; __e__('Hello', Hello);;`
+        code: `class Hello {}; __e__('Hello', Hello);;`
     }
 }, {
     input: 'export class Hello {}',
     output: {
         exports: ['Hello'],
-        transpiled: `class Hello {}; __e__('Hello', Hello);`
+        code: `class Hello {}; __e__('Hello', Hello);`
     }
 }, {
     input: 'export function Hello () {};',
     output: {
         exports: ['Hello'],
-        transpiled: `function Hello () {}; __e__('Hello', Hello);;`
+        code: `function Hello () {}; __e__('Hello', Hello);;`
     }
 }, {
     input: 'let name1 = 123, name2 = 456; export {name1, name2};',
     output: {
         exports: ['name1', 'name2'],
-        transpiled: `let name1 = 123, name2 = 456; __e__('name1', name1);__e__('name2', name2);`
+        code: `let name1 = 123, name2 = 456; __e__('name1', name1);__e__('name2', name2);`
     }
 }, {
     input: 'let hello = 123, name = 456; export {hello as world, name};',
     output: {
         exports: ['world', 'name'],
-        transpiled: `let hello = 123, name = 456; __e__('world', hello);__e__('name', name);`
+        code: `let hello = 123, name = 456; __e__('world', hello);__e__('name', name);`
     }
 }, {
     input: 'export var MyVar1 = 123;',
     output: {
         exports: ['MyVar1'],
-        transpiled: `var MyVar1 = 123;; __e__('MyVar1', MyVar1);`
+        code: `var MyVar1 = 123;; __e__('MyVar1', MyVar1);`
     }
 }, {
     input: 'export var MyVar1 = () => {}, MyVar2 = 456;',
     output: {
         exports: ['MyVar1', 'MyVar2'],
-        transpiled: `var MyVar1 = () => {}, MyVar2 = 456;; __e__('MyVar1', MyVar1), __e__('MyVar2', MyVar2);`
+        code: `var MyVar1 = () => {}, MyVar2 = 456;; __e__('MyVar1', MyVar1), __e__('MyVar2', MyVar2);`
     }
 }, {
     input: 'export var MyVar1 = () => {}, MyVar2 = 456',
     output: {
         exports: ['MyVar1', 'MyVar2'],
-        transpiled: `var MyVar1 = () => {}, MyVar2 = 456; __e__('MyVar1', MyVar1), __e__('MyVar2', MyVar2);`
+        code: `var MyVar1 = () => {}, MyVar2 = 456; __e__('MyVar1', MyVar1), __e__('MyVar2', MyVar2);`
     }
 }, {
     input: 'export const MyVar1 = () => {}, MyVar2 = 456;',
     output: {
         exports: ['MyVar1', 'MyVar2'],
-        transpiled: `const MyVar1 = () => {}, MyVar2 = 456;; __e__('MyVar1', MyVar1), __e__('MyVar2', MyVar2);`
+        code: `const MyVar1 = () => {}, MyVar2 = 456;; __e__('MyVar1', MyVar1), __e__('MyVar2', MyVar2);`
     }
 }, {
     input: 'export { MyVar } from "./file"',
@@ -207,7 +207,7 @@ let tests = [{
             }]
         }],
         exports: ['MyVar'],
-        transpiled: `__e__('MyVar', ex_MyVar);`
+        code: `__e__('MyVar', ex_MyVar);`
     }
 }, {
     input: 'export { default } from "./file";',
@@ -221,7 +221,7 @@ let tests = [{
             }]
         }],
         exports: ['default'],
-        transpiled: `__e__('default', ex_default);`
+        code: `__e__('default', ex_default);`
     }
 }, {
     input: 'export * from "./file"',
@@ -235,7 +235,7 @@ let tests = [{
             }]
         }],
         exports: [],
-        transpiled: `for(var __k__ in ex_i0){__k__ !== "default" && (__e__(__k__, ex_i0[__k__]))}`
+        code: `for(var __k__ in ex_i0){__k__ !== "default" && (__e__(__k__, ex_i0[__k__]))}`
     }
 }, {
     input: 'import Hello from "hello";import World from "world";',
@@ -262,7 +262,7 @@ describe ('es_to_cjs', () => {
     tests.forEach(test => {
         it(test.input, async () => {
              test.output = {
-                transpiled: '',
+                code: '',
                 imports: [],
                 exports: [],
                 dynamicImports: [],
@@ -270,13 +270,13 @@ describe ('es_to_cjs', () => {
                 ...test.output
             };
 
-            let res = await es_to_cjs(test.input, { plugins: [] }, process.cwd() + '/__entry');
+            let res = await es_to_cjs({ plugins: [] }, test.input, process.cwd() + '/__entry');
             let to_check = {};
             for (let key in test.output) {
                 to_check[key] = res[key];
             }
 
-            to_check.transpiled = to_check.transpiled.trim().replace(/\s+/g, ' ');
+            to_check.code = to_check.code.trim().replace(/\s+/g, ' ');
 
             test.output.imports = test.output.imports.map(dep => {
                 dep.source = path.resolve(process.cwd(), dep.source + (!path.extname(dep.source)? '.js' : ''));
@@ -299,7 +299,7 @@ describe ('es_to_cjs', () => {
 let external_tests = [{
     input: 'import jQuery from "jquery";',
     output: {
-        transpiled: '',
+        code: '',
         imports: [],
         externalImports: [{
             source: 'jquery',
@@ -316,7 +316,7 @@ let external_tests = [{
 }, {
     input: 'import $ from "jquery";',
     output: {
-        transpiled: '',
+        code: '',
         imports: [],
         externalImports: [{
             source: 'jquery',
@@ -333,7 +333,7 @@ let external_tests = [{
 }, {
     input: 'import jquery from "jquery";',
     output: {
-        transpiled: '',
+        code: '',
         imports: [],
         externalImports: [{
             source: 'jquery',
@@ -355,7 +355,7 @@ let external_tests = [{
 }, {
     input: 'import { max } from "Math";',
     output: {
-        transpiled: '',
+        code: '',
         imports: [],
         externalImports: [{
             source: 'Math',
@@ -372,7 +372,7 @@ let external_tests = [{
 },{
     input: 'import { max, min } from "Math";',
     output: {
-        transpiled: '',
+        code: '',
         imports: [],
         externalImports: [{
             source: 'Math',
@@ -392,7 +392,7 @@ let external_tests = [{
 }, {
     input: 'import $, { ajax } from "jquery";',
     output: {
-        transpiled: '',
+        code: '',
         imports: [],
         externalImports: [{
             source: 'jquery',
@@ -412,7 +412,7 @@ let external_tests = [{
 }, {
     input: 'import { ajax as net } from "jquery";',
     output: {
-        transpiled: '',
+        code: '',
         imports: [],
         externalImports: [{
             source: 'jquery',
@@ -434,7 +434,7 @@ let external_tests = [{
 }, {
     input: 'export { ajax } from "jquery";',
     output: {
-        transpiled: `__e__('ajax', ex_ajax);`,
+        code: `__e__('ajax', ex_ajax);`,
         imports: [],
         exports: ['ajax'],
         externalImports: [{
@@ -452,7 +452,7 @@ let external_tests = [{
 }, {
     input: 'export { ajax } from "jquery";',
     output: {
-        transpiled: `__e__('ajax', ex_ajax);`,
+        code: `__e__('ajax', ex_ajax);`,
         imports: [],
         exports: ['ajax'],
         externalImports: [{
@@ -475,7 +475,7 @@ let external_tests = [{
 }, {
     input: 'export { ajax as net} from "jquery";',
     output: {
-        transpiled: `__e__('net', ex_net);`,
+        code: `__e__('net', ex_net);`,
         imports: [],
         exports: ['net'],
         externalImports: [{
@@ -498,7 +498,7 @@ let external_tests = [{
 }, {
     input: 'export * from "jquery";',
     output: {
-        transpiled: `for(var __k__ in ex__nollup__external__jquery__){__k__ !== "default" && (__e__(__k__, ex__nollup__external__jquery__[__k__]))}`,
+        code: `for(var __k__ in ex__nollup__external__jquery__){__k__ !== "default" && (__e__(__k__, ex__nollup__external__jquery__[__k__]))}`,
         imports: [],
         exports: [],
         externalImports: [{
@@ -516,7 +516,7 @@ let external_tests = [{
 }, {
     input: 'export * from "jquery";',
     output: {
-        transpiled: `for(var __k__ in ex__nollup__external__jquery__){__k__ !== "default" && (__e__(__k__, ex__nollup__external__jquery__[__k__]))}`,
+        code: `for(var __k__ in ex__nollup__external__jquery__){__k__ !== "default" && (__e__(__k__, ex__nollup__external__jquery__[__k__]))}`,
         imports: [],
         exports: [],
         externalImports: [{
@@ -539,7 +539,7 @@ let external_tests = [{
 }, {
     input: 'import { ajax } from "jquery";',
     output: {
-        transpiled: ``,
+        code: ``,
         imports: [],
         externalImports: [{
             source: 'jquery',
@@ -556,7 +556,7 @@ let external_tests = [{
 }, {
     input: 'import { ajax } from "some/other/dep";',
     output: {
-        transpiled: ``,
+        code: ``,
         imports: [],
         externalImports: [{
             source: 'some/other/dep',
@@ -577,18 +577,18 @@ let external_tests = [{
 describe('es_to_cs_externals (ESM)', () => {
     external_tests.forEach(test => {
         it(test.input, async () => {
-            let res = await es_to_cjs(test.input, {
+            let res = await es_to_cjs({
                 ...test.config, 
                 plugins: [],
                 output: { ...test.config.output, format: 'esm' }
-            }, process.cwd() + '/__entry');
+            }, test.input, process.cwd() + '/__entry');
             let to_check = {}; 
 
             for (let key in test.output) {
                 to_check[key] = res[key];
             }
 
-            to_check.transpiled = to_check.transpiled.trim().replace(/\s+/g, ' ');
+            to_check.code = to_check.code.trim().replace(/\s+/g, ' ');
 
             try {
                 expect(to_check).to.deep.equal(test.output);
@@ -604,20 +604,20 @@ describe('es_to_cs_externals (ESM)', () => {
 
 describe('misc transform issues', () => {
     it ('should not fail on null nodes', async () => {
-        let res = await es_to_cjs(`
+        let res = await es_to_cjs({ plugins: [] }, `
             import Hello from './World';
             let a = [1, 2, , 4];
-        `, { plugins: [] }, process.cwd() + '/__entry');
-        expect(res.transpiled.indexOf('[1, 2, , 4]') > -1).to.be.true;
+        `,  process.cwd() + '/__entry');
+        expect(res.code.indexOf('[1, 2, , 4]') > -1).to.be.true;
     });
 
     it ('should properly blank two imports without semi-colons', async () => {
-        let res = await es_to_cjs([
+        let res = await es_to_cjs({ plugins: [] }, [
             'import Hello from "hello"',
             'import World from "world"',
             'console.log(Hello, World)'
-        ].join('\n'), { plugins: [] }, process.cwd() + '/_entry');
-        expect(res.transpiled).to.equal([
+        ].join('\n'), process.cwd() + '/_entry');
+        expect(res.code).to.equal([
             '                         ',
             '                         ',
             'console.log(Hello, World)'
@@ -625,11 +625,11 @@ describe('misc transform issues', () => {
     });
 
     it ('should properly blank two imports on the same line', async () => {
-        let res = await es_to_cjs([
+        let res = await es_to_cjs({ plugins: [] }, [
             'import Hello from "hello";import World from "world"',
             'console.log(Hello, World)'
-        ].join('\n'), { plugins: [] }, process.cwd() + '/_entry');
-        expect(res.transpiled).to.equal([
+        ].join('\n'), process.cwd() + '/_entry');
+        expect(res.code).to.equal([
             '                                                   ',
             'console.log(Hello, World)'
         ].join('\n'));
@@ -637,7 +637,7 @@ describe('misc transform issues', () => {
 
 
     it ('should properly blank imports that span multiple lines', async () => {
-        let res = await es_to_cjs([
+        let res = await es_to_cjs({ plugins: [] }, [
             'import {',
             '   Hello',
             '} from "hello";',
@@ -645,8 +645,8 @@ describe('misc transform issues', () => {
             '   World',
             '} from "world";',
             'console.log(Hello, World)'
-        ].join('\n'), { plugins: [] }, process.cwd() + '/_entry');
-        expect(res.transpiled).to.equal([
+        ].join('\n'), process.cwd() + '/_entry');
+        expect(res.code).to.equal([
             '        ',
             '        ',
             '               ',
@@ -658,13 +658,13 @@ describe('misc transform issues', () => {
     });
 
     it ('should properly blank export {} blocks', async () => {
-        let res = await es_to_cjs([
+        let res = await es_to_cjs({ plugins: [] }, [
             'var Hello, World, Foo, Bar;',
             'export { Hello, World }',
             'export { Foo, Bar };',
             'console.log(Hello, World)'
-        ].join('\n'), { plugins: [] }, process.cwd() + '/_entry');
-        expect(res.transpiled).to.equal([
+        ].join('\n'), process.cwd() + '/_entry');
+        expect(res.code).to.equal([
             'var Hello, World, Foo, Bar;',
             '                       __e__(\'Hello\', Hello);__e__(\'World\', World);',
             '                    __e__(\'Foo\', Foo);__e__(\'Bar\', Bar);',
@@ -673,15 +673,15 @@ describe('misc transform issues', () => {
     });
 
     it ('should properly blank export {} blocks over multiple lines with padding', async () => {
-        let res = await es_to_cjs([
+        let res = await es_to_cjs({ plugins: [] }, [
             'var Hello, World, Foo, Bar;',
             'export {                   ',
             '    Hello,                 ',
             '    World                  ',
             '}                          ',
             'console.log(Hello, World)'
-        ].join('\n'), { plugins: [] }, process.cwd() + '/_entry');
-        expect(res.transpiled).to.equal([
+        ].join('\n'), process.cwd() + '/_entry');
+        expect(res.code).to.equal([
             'var Hello, World, Foo, Bar;',
             '                           ',
             '                           ',

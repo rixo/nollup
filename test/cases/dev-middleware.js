@@ -100,18 +100,18 @@ function createResponse (callback) {
     }
 }
 
-function createNext () {
-    return () => {};
+function createNext (next) {
+    return next || (() => {});
 }
 
-function mwFetch (mw, url) {
-    return new Promise(resolve => {
+function mwFetch (mw, url, next) {
+    return new Promise((resolve, reject) => {
         mw(
             createRequest(url),
             createResponse(res => {
                 resolve(res);
             }),
-            createNext()
+            createNext(reject)
         )
     })
 }
@@ -1036,5 +1036,5 @@ describe('Dev Middleware', () => {
                 });
             });
         });
-    });
+    });    
 });

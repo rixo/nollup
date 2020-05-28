@@ -1,4 +1,5 @@
 let { nollup, fs, expect, rollup } = require('../../nollup');
+let path = require('path');
 
 describe ('Options: output.chunkFileNames', () => {
     let bundle;
@@ -44,6 +45,8 @@ describe ('Options: output.chunkFileNames', () => {
         });
 
         let file = output.find(o => o.fileName === 'main.js');
-        expect(file.code.indexOf('require.dynamic(\\\'./lol-esm.js\\\')') > -1).to.be.true;
+        let importId = path.resolve(process.cwd(), './src/dynamic.js');
+        expect(file.code.indexOf(`require.dynamic(\\'${importId.replace(/\\/g, '\\\\\\\\')}`) > -1).to.be.true;
+        expect(file.code.indexOf(`'${importId.replace(/\\/g, '\\\\')}': '/lol-esm.js'`) > -1).to.be.true;
     });
 });
